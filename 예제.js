@@ -342,40 +342,6 @@ var chartMinMax =
 print(chartMinMax);
 */
 
-//============================================================================
-//--------------------------->Random Foresst<---------------------------------
-//============================================================================
-
-var SRTM = ee.Image('USGS/SRTMGL1_003');
-var elevation = SRTM.select('elevation');
-var slopeSRTM = ee.Terrain.slope(elevation);
-
-
-var RFcollection = collectionLinearFit.select(['scale', 'offset']);
-
-var samplesRFRegression = ee.FeatureCollection(Change_1.merge(Change2).merge(NoChange));
-var gcp = samplesRFRegression;
-var composite = RFcollection;
-var gcp = gcp.randomColumn();
-
-var trainingGcp = gcp.filter(ee.Filter.lt('random', 0.6));
-var validationGcp = gcp.filter(ee.Filter.gte('random', 0.6));
-
-// Overlay the point on the image to get training data.
-var training = composite.sampleRegions({
-  collection: trainingGcp,
-  properties: ['Class'],
-  scale: 10,
-});
-print(training)
-// Train a classifier.
-var classifier = ee.Classifier.smileRandomForest(90)
-.train({
-  features: training,
-  classProperty: 'Class',
-  inputProperties: composite.bandNames()
-});
-
 /*
 //**************************************************************************
 // Feature Importance
